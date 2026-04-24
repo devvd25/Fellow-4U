@@ -1,12 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../core/constants.dart';
+import '../core/message.dart';
 import 'add_friend.dart';
 
-class ChatDetailScreen extends StatelessWidget {
+class ChatDetailScreen extends StatefulWidget {
   final String name;
   final String avatar;
 
   const ChatDetailScreen({super.key, required this.name, required this.avatar});
+
+  @override
+  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+}
+
+class _ChatDetailScreenState extends State<ChatDetailScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late List<Message> _messages;
+  late String _chatId;
+
+  @override
+  void initState() {
+    super.initState();
+    _chatId = widget.name.replaceAll(' ', '_').toLowerCase();
+    
+    // Initialize with default messages if chat is new
+    ChatStorage.initializeChat(_chatId, [
+      Message(
+        text: 'hi, this is ${widget.name}',
+        isMe: false,
+        timestamp: DateTime(2020, 1, 28, 10, 30),
+        avatarUrl: widget.avatar,
+      ),
+      Message(
+        text: 'It is a long established fact that a reader will be distracted by the',
+        isMe: false,
+        timestamp: DateTime(2020, 1, 28, 10, 30),
+        avatarUrl: widget.avatar,
+      ),
+      Message(
+        text: "as opposed to using 'Content here",
+        isMe: true,
+        timestamp: DateTime(2020, 1, 28, 10, 31),
+      ),
+      Message(
+        text: "There are many variations of passages",
+        isMe: true,
+        timestamp: DateTime(2020, 1, 28, 10, 31),
+      ),
+    ]);
+    
+    _messages = ChatStorage.getMessages(_chatId);
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+
+    final newMessage = Message(
+      text: _messageController.text.trim(),
+      isMe: true,
+      timestamp: DateTime.now(),
+    );
+
+    setState(() {
+      ChatStorage.addMessage(_chatId, newMessage);
+      _messages = ChatStorage.getMessages(_chatId);
+    });
+
+    _messageController.clear();
+    
+    // Scroll to bottom after sending
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +102,10 @@ class ChatDetailScreen extends StatelessWidget {
         ),
         title: Row(
           children: [
-            CircleAvatar(radius: 16, backgroundImage: NetworkImage(avatar)),
+            CircleAvatar(radius: 16, backgroundImage: NetworkImage(widget.avatar)),
             const SizedBox(width: 10),
             Text(
-              name,
+              widget.name,
               style: const TextStyle(
                 color: textColor,
                 fontSize: 16,
@@ -55,35 +136,41 @@ class ChatDetailScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
+            child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(20),
-              children: [
-                const Center(
-                  child: Text(
-                    'Jan 28, 2020',
-                    style: TextStyle(color: hintColor, fontSize: 12),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildIncomingMessage('hi, this is $name', '10:30 AM', avatar),
-                _buildIncomingMessage(
-                  'It is a long established fact that a reader will be distracted by the',
-                  '',
-                  avatar,
-                  hideAvatar: true,
-                ),
-                const SizedBox(height: 10),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '10:31 AM',
-                    style: TextStyle(color: hintColor, fontSize: 11),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                _buildOutgoingMessage("as opposed to using 'Content here"),
-                _buildOutgoingMessage("There are many variations of passages"),
-              ],
+              itemCount: _messages.length + 1, // +1 for date header
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          _messages.isNotEmpty
+                              ? DateFormat('MMM dd, yyyy').format(_messages.first.timestamp)
+                              : 'Today',
+                          style: const TextStyle(color: hintColor, fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }
+                
+                final message = _messages[index - 1];
+                final showAvatar = index == 1 || 
+                    (index > 1 && _messages[index - 2].isMe != message.isMe);
+                final showTime = showAvatar && !message.isMe;
+                
+                return message.isMe
+                    ? _buildOutgoingMessage(message)
+                    : _buildIncomingMessage(
+                        message.text,
+                        showTime ? DateFormat('hh:mm a').format(message.timestamp) : '',
+                        widget.avatar,
+                        hideAvatar: !showAvatar,
+                      );
+              },
             ),
           ),
           _buildInputBar(),
@@ -118,7 +205,7 @@ class ChatDetailScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 5),
                     child: Text(
-                      '$name  $time',
+                      '${widget.name}  $time',
                       style: const TextStyle(fontSize: 11, color: hintColor),
                     ),
                   ),
@@ -154,7 +241,7 @@ class ChatDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOutgoingMessage(String text) {
+  Widget _buildOutgoingMessage(Message message) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -175,7 +262,7 @@ class ChatDetailScreen extends StatelessWidget {
                 ),
               ),
               child: Text(
-                text,
+                message.text,
                 style: const TextStyle(
                   color: textColor,
                   fontSize: 14,
@@ -210,23 +297,29 @@ class ChatDetailScreen extends StatelessWidget {
                   color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: const InputDecoration(
                     hintText: 'Type message',
                     hintStyle: TextStyle(color: hintColor),
                     border: InputBorder.none,
                   ),
+                  onSubmitted: (_) => _sendMessage(),
+                  textInputAction: TextInputAction.send,
                 ),
               ),
             ),
             const SizedBox(width: 15),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
+            GestureDetector(
+              onTap: _sendMessage,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.send, color: Colors.white, size: 18),
               ),
-              child: const Icon(Icons.send, color: Colors.white, size: 18),
             ),
           ],
         ),

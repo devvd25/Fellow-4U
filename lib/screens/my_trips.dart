@@ -156,7 +156,7 @@ class _MyTripsScreenState extends State<MyTripsScreen> {
             imgUrl:
                 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=600',
             avatars: [
-              'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100',
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
             ],
             badge: _buildBadge(
               'Mark Finished',
@@ -193,7 +193,7 @@ class _MyTripsScreenState extends State<MyTripsScreen> {
             imgUrl:
                 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&q=80&w=600',
             avatars: [
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+              'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
             ],
             buttons: [
               _buildOutlineButton('Detail'),
@@ -211,7 +211,7 @@ class _MyTripsScreenState extends State<MyTripsScreen> {
             imgUrl:
                 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80&w=600',
             avatars: [
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+              'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
             ],
             badge: _buildBadge('Waiting', color: Colors.blue),
             buttons: [_buildOutlineButton('Detail')],
@@ -227,7 +227,7 @@ class _MyTripsScreenState extends State<MyTripsScreen> {
                 'https://images.unsplash.com/photo-1542314831-c6a4d14b83cc?auto=format&fit=crop&q=80&w=600',
             badge: _buildBadge('Bidding', color: Colors.orange),
             avatars: [
-              'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100',
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
               'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
             ],
             extraAvatars: 3,
@@ -266,7 +266,7 @@ class _MyTripsScreenState extends State<MyTripsScreen> {
             imgUrl:
                 'https://images.unsplash.com/photo-1542314831-c6a4d14b83cc?auto=format&fit=crop&q=80&w=600',
             avatars: [
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+              'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
             ],
             buttons: [],
           ),

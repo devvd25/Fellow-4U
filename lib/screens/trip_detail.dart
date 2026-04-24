@@ -131,7 +131,7 @@ class TripDetailScreen extends StatelessWidget {
             child: const CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+                'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
               ),
             ),
           ),

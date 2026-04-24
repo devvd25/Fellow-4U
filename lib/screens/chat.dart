@@ -103,7 +103,7 @@ class ChatScreen extends StatelessWidget {
                 message: "It's a beautiful place",
                 time: '10:30 AM',
                 avatar:
-                    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100',
+                    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
               ),
               _buildChatItem(
                 context,
@@ -111,7 +111,7 @@ class ChatScreen extends StatelessWidget {
                 message: "We can start at 8am",
                 time: '10:30 AM',
                 avatar:
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
                 unreadCount: 2,
               ),
               _buildChatItem(

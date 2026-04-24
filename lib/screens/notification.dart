@@ -14,7 +14,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     {
       'id': 1,
       'avatar':
-          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100', // Hình nam
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100', // Hình nam
       'name': 'Tuan Tran',
       'message':
           'accepted your request for the trip in Danang, Vietnam on Jan 20, 2020',

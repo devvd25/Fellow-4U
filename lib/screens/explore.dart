@@ -47,7 +47,7 @@ class _HeaderSection extends StatelessWidget {
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(
-                'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=800',
+                'https://picsum.photos/seed/explore-header/800/420',
               ),
               fit: BoxFit.cover,
             ),
@@ -177,19 +177,19 @@ class _TopJourneysSection extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: 240,
+            height: 270,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 _buildJourneyCard(
                   'Da Nang - Ba Na - Hoi An',
                   '\$400.00',
-                  'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=400',
+                  'https://picsum.photos/seed/journey-danang/400/280',
                 ),
                 _buildJourneyCard(
                   'Thailand',
                   '\$600.00',
-                  'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80&w=400',
+                  'https://picsum.photos/seed/journey-thailand/400/280',
                 ),
               ],
             ),
@@ -201,39 +201,70 @@ class _TopJourneysSection extends StatelessWidget {
 
   Widget _buildJourneyCard(String title, String price, String imgUrl) {
     return Container(
-      width: 160,
+      width: 180,
       margin: const EdgeInsets.only(right: 15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              imgUrl,
-              height: 130,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  imgUrl,
+                  height: 130,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                SizedBox(
+                  height: 38,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 8),
                 Row(
                   children: const [
                     Icon(Icons.calendar_today, size: 12, color: hintColor),
@@ -244,7 +275,7 @@ class _TopJourneysSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Row(
                   children: const [
                     Icon(Icons.access_time, size: 12, color: hintColor),
@@ -255,13 +286,13 @@ class _TopJourneysSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 8),
                 Text(
                   price,
                   style: const TextStyle(
                     color: primaryColor,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 15,
                   ),
                 ),
               ],
@@ -313,19 +344,19 @@ class _BestGuidesSection extends StatelessWidget {
                   context,
                   'Tuan Tran',
                   'Danang, Vietnam',
-                  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200',
+                  'https://picsum.photos/seed/guide-tuan/220/220',
                 ),
                 _buildGuideCard(
                   context,
                   'Emmy',
                   'Hanoi, Vietnam',
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+                  'https://picsum.photos/seed/guide-emmy/220/220',
                 ),
                 _buildGuideCard(
                   context,
                   'Linh Hana',
                   'Danang, Vietnam',
-                  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200',
+                  'https://picsum.photos/seed/guide-linh/220/220',
                 ),
               ],
             ),
@@ -407,21 +438,21 @@ class _TopExperiencesSection extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: 220,
+            height: 270,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 _buildExpCard(
                   '2 Hour Bicycle Tour...',
                   'Tuan Tran',
-                  'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=300',
-                  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100',
+                  'https://picsum.photos/seed/exp-bike/320/220',
+                  'https://picsum.photos/seed/avatar-tuan/120/120',
                 ),
                 _buildExpCard(
                   '1 day at Bana Hill',
                   'Linh Hana',
-                  'https://images.unsplash.com/photo-1583417311718-ee2f659cb51e?auto=format&fit=crop&q=80&w=300',
-                  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=100',
+                  'https://picsum.photos/seed/exp-bana/320/220',
+                  'https://picsum.photos/seed/avatar-linh/120/120',
                 ),
               ],
             ),
@@ -438,8 +469,19 @@ class _TopExperiencesSection extends StatelessWidget {
     String avatarImg,
   ) {
     return Container(
-      width: 160,
+      width: 180,
       margin: const EdgeInsets.only(right: 15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -457,7 +499,23 @@ class _TopExperiencesSection extends StatelessWidget {
                 ),
               ),
               Positioned(
-                bottom: -20,
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -18,
                 child: Column(
                   children: [
                     CircleAvatar(
@@ -465,10 +523,11 @@ class _TopExperiencesSection extends StatelessWidget {
                       radius: 20,
                       backgroundColor: Colors.white,
                     ),
+                    const SizedBox(height: 2),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                        horizontal: 10,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: primaryColor,
@@ -478,7 +537,7 @@ class _TopExperiencesSection extends StatelessWidget {
                         guideName,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 11,
                         ),
                       ),
                     ),
@@ -487,11 +546,15 @@ class _TopExperiencesSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 25),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            maxLines: 2,
+          const SizedBox(height: 30),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -531,14 +594,14 @@ class _FeaturedToursSection extends StatelessWidget {
             context,
             'Da Nang - Ba Na - Hoi An',
             '\$400.00',
-            'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=600',
+            'https://picsum.photos/seed/featured-danang/900/520',
           ),
           const SizedBox(height: 15),
           _buildFeatureCard(
             context,
             'Melbourne - Sydney',
             '\$600.00',
-            'https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&q=80&w=600',
+            'https://picsum.photos/seed/featured-melbourne/900/520',
           ),
         ],
       ),
@@ -661,13 +724,13 @@ class _TravelNewsSection extends StatelessWidget {
           _buildNewsCard(
             'New Destination in Danang City',
             'Feb 5, 2026',
-            'https://images.unsplash.com/photo-1542314831-c6a4d14b83cc?auto=format&fit=crop&q=80&w=600',
+            'https://picsum.photos/seed/news-danang/900/420',
           ),
           const SizedBox(height: 15),
           _buildNewsCard(
             '\$1 Flight Ticket',
             'Feb 5, 2026',
-            'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=600',
+            'https://picsum.photos/seed/news-flight/900/420',
           ),
         ],
       ),
