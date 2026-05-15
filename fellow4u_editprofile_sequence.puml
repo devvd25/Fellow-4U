@@ -12,22 +12,7 @@ participant "Cloudinary\n(Storage)" as CLD
 participant "SQLite\nDatabase" as DB
 
 U -> EP: Vào màn hình Edit Profile
-EP -> API: get(/auth/user, {JWT token})
-API -> BE: HTTP GET /auth/user
-BE -> BE: Verify JWT token
-
-alt Token không hợp lệ
-  BE -> API: 401 Unauthorized
-  API -> EP: 401 Error
-  EP -> U: Hiển thị "Phiên đăng nhập hết hạn"
-else Token hợp lệ
-  BE -> DB: findById(userId)
-  DB -> BE: Return user data
-
-  BE -> API: 200 OK {user data}
-  API -> EP: Response user info
-  EP -> U: Hiển thị thông tin user (name, phone, location, avatar)
-end
+EP -> EP: Load user data từ Local Storage
 
 U -> EP: Thay đổi thông tin
 
@@ -40,7 +25,7 @@ alt Người dùng chọn ảnh mới
   alt Ảnh không hợp lệ
     EP -> U: Hiển thị lỗi validate ảnh
   else Ảnh hợp lệ
-    EP -> API: post(/api/upload, {file, JWT token})
+    EP -> API: post(/api/upload, {file})
     API -> BE: HTTP POST /api/upload (multipart/form-data)
     BE -> BE: Validate file (size, type)
     BE -> CLD: Upload file to Cloudinary
