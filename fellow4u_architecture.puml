@@ -1,0 +1,47 @@
+@startuml Fellow4U_System_Architecture
+
+!define RECTANGLE rectangle
+skinparam linetype ortho
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+package "Mobile Application (Frontend)" {
+  component "UI Layer\n(Flutter Widgets)" as UILayer
+  component "Business Logic\n(Services)" as BusinessLogic
+  component "Local Storage\n(SharedPreferences)" as LocalStorage
+
+  UILayer --> BusinessLogic: Tương tác dữ liệu
+  BusinessLogic --> LocalStorage: Lưu/Tải Session\nUser Info
+}
+
+package "Network Communication" {
+  component "HTTP/REST API\n(POST, GET, PATCH)" as HTTPClient
+}
+
+package "Backend Server (Express.js)" {
+  component "API Routes\n(/auth, /api)" as Routes
+  component "Middleware\n(authMiddleware, upload)" as Middleware
+  component "Controllers\n(authController, chatController,\ntripController, coreController)" as Controllers
+  component "Models\n(Sequelize ORM)" as Models
+
+  Routes --> Middleware: Xử lý request
+  Middleware --> Controllers: Kiểm tra JWT\nValidate input
+  Controllers --> Models: Query/Update data
+}
+
+package "Data Storage" {
+  component "SQLite Database\n(Users, Messages,\nConversations, Trips)" as SQLiteDB
+  component "Cloudinary\n(Image Storage)" as Cloudinary
+}
+
+BusinessLogic --> HTTPClient: Gửi request
+HTTPClient --> Routes: HTTP Request
+
+Controllers --> SQLiteDB: SQL queries
+Controllers --> Cloudinary: Upload files
+
+LocalStorage -.-> BusinessLogic: Đọc token\nkhi offline
+
+HTTPClient <-- Controllers: HTTP Response
+
+@enduml
