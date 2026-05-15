@@ -1,0 +1,156 @@
+@startuml Fellow4U_Architecture_Detailed
+
+!define TECH_FONT_COLOR #000000
+!define TECH_BG_COLOR #E1F5FF
+!define DB_BG_COLOR #FFF3E0
+!define SERVICE_BG_COLOR #F3E5F5
+!define COMP_BG_COLOR #E8F5E9
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+
+' ==== MOBILE APPLICATION ====
+package "📱 MOBILE APPLICATION (Flutter)" {
+  package "🎨 Presentation Layer (UI Screens)" {
+    component "Authentication\n(SignIn, SignUp,\nForgotPassword)" as AuthScreen
+    component "Core Screens\n(MainScreen, Explore,\nProfile, Settings)" as CoreScreen
+    component "Trip Management\n(MyTrips, CreateTrip,\nTripDetail)" as TripScreen
+    component "Chat\n(ChatList,\nChatDetail)" as ChatScreen
+    component "User Management\n(EditProfile,\nAddFriend, ChangePassword)" as UserScreen
+  }
+
+  package "⚙️ Business Logic Layer" {
+    component "ApiService\n(HTTP Requests)" as ApiService
+    component "Services\n(Auth, Chat,\nTrip Services)" as Services
+  }
+
+  package "💾 Data Layer" {
+    component "Local Storage\n(SharedPreferences)" as LocalStorage
+  }
+
+  AuthScreen --> Services
+  CoreScreen --> Services
+  TripScreen --> Services
+  ChatScreen --> Services
+  UserScreen --> Services
+  Services --> ApiService
+  Services --> LocalStorage
+}
+
+' ==== NETWORK ====
+package "🌐 Network" {
+  component "HTTP/REST API\n(JSON)" as HTTPNetwork
+}
+
+' ==== BACKEND SERVER ====
+package "🖥️ BACKEND SERVER (Express.js)" {
+  package "🛣️ API Routes" {
+    component "/auth\n(login, signup,\nupdate)" as AuthRoute
+    component "/api/users\n(getUsers)" as UsersRoute
+    component "/api/news\n(getNews)" as NewsRoute
+    component "/api/tours\n(getTours)" as ToursRoute
+    component "/api/trips\n(getTrips, createTrip,\ngetTripDetail)" as TripsRoute
+    component "/api/chat\n(getConversations,\ngetMessages,\nsendMessage)" as ChatRoute
+    component "/api/upload\n(uploadFile)" as UploadRoute
+  }
+
+  package "🔒 Middleware" {
+    component "Auth Middleware\n(JWT Verification)" as AuthMiddleware
+    component "Upload Middleware\n(Cloudinary)" as UploadMiddleware
+    component "CORS Middleware\n(Origin Validation)" as CORSMiddleware
+  }
+
+  package "🎮 Controllers" {
+    component "AuthController\n(login, signup,\nupdateProfile)" as AuthController
+    component "CoreController\n(getUsers, getNews,\ngetTours)" as CoreController
+    component "TripController\n(getTripDetail,\ngetUserTrips,\ncreateTip)" as TripController
+    component "ChatController\n(getConversations,\ngetMessages,\nsendMessage)" as ChatController
+    component "UploadController\n(uploadFile)" as UploadController
+  }
+
+  package "📊 Data Models (Sequelize ORM)" {
+    component "User\n(id, name, email,\npassword, phone,\nlocation, avatar)" as UserModel
+    component "Trip\n(id, userId,\nname, destination)" as TripModel
+    component "Conversation\n(id, createdAt)" as ConversationModel
+    component "Message\n(id, text,\nconversationId,\nsenderId)" as MessageModel
+    component "News\n(id, title,\ncontent, image)" as NewsModel
+    component "Tour\n(id, name,\nlocation, price)" as TourModel
+  }
+
+  AuthRoute --> AuthMiddleware
+  TripsRoute --> AuthMiddleware
+  ChatRoute --> AuthMiddleware
+  UsersRoute --> CORSMiddleware
+  NewsRoute --> CORSMiddleware
+  ToursRoute --> CORSMiddleware
+  UploadRoute --> UploadMiddleware
+
+  AuthMiddleware --> AuthController
+  TripsRoute --> TripController
+  ChatRoute --> ChatController
+  UsersRoute --> CoreController
+  NewsRoute --> CoreController
+  ToursRoute --> CoreController
+  UploadRoute --> UploadController
+
+  AuthController --> UserModel
+  TripController --> TripModel
+  TripController --> UserModel
+  ChatController --> ConversationModel
+  ChatController --> MessageModel
+  ChatController --> UserModel
+  CoreController --> NewsModel
+  CoreController --> TourModel
+  CoreController --> UserModel
+  UploadController --> UploadMiddleware
+}
+
+' ==== DATABASE ====
+package "💾 DATA STORAGE" {
+  package "🗄️ SQLite Database" {
+    component "Users Table\n(id, name, email,\npassword, avatar,\nphone, location)" as UsersTable
+    component "Trips Table\n(id, userId, name,\ndestination)" as TripsTable
+    component "Conversations Table\n(id, createdAt)" as ConversationsTable
+    component "Messages Table\n(id, text, senderId,\nconversationId,\ncreatedAt)" as MessagesTable
+    component "News Table\n(id, title, content,\nimage, createdAt)" as NewsTable
+    component "Tours Table\n(id, name, location,\nprice, description)" as ToursTable
+    component "UserConversations Table\n(userId, conversationId)" as UserConversationsTable
+  }
+
+  package "☁️ Cloud Storage" {
+    component "Cloudinary\n(Image Upload,\nImage Storage,\nURL Generation)" as Cloudinary
+  }
+
+  UserModel --> UsersTable
+  TripModel --> TripsTable
+  ConversationModel --> ConversationsTable
+  MessageModel --> MessagesTable
+  NewsModel --> NewsTable
+  TourModel --> ToursTable
+  ConversationModel --> UserConversationsTable
+}
+
+' ==== CONNECTIONS ====
+ApiService --> HTTPNetwork: HTTP Request
+HTTPNetwork --> AuthRoute: /auth/*
+HTTPNetwork --> UsersRoute: /api/users
+HTTPNetwork --> NewsRoute: /api/news
+HTTPNetwork --> ToursRoute: /api/tours
+HTTPNetwork --> TripsRoute: /api/trips
+HTTPNetwork --> ChatRoute: /api/chat
+HTTPNetwork --> UploadRoute: /api/upload
+
+HTTPNetwork <-- AuthRoute: JSON Response
+HTTPNetwork <-- UsersRoute: JSON Response
+HTTPNetwork <-- NewsRoute: JSON Response
+HTTPNetwork <-- ToursRoute: JSON Response
+HTTPNetwork <-- TripsRoute: JSON Response
+HTTPNetwork <-- ChatRoute: JSON Response
+HTTPNetwork <-- UploadRoute: JSON Response
+
+UploadController --> Cloudinary: Upload Image
+
+LocalStorage -.-> ApiService: Read/Write\nToken & User Info
+
+@enduml
