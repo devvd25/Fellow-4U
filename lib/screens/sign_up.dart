@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../core/widgets.dart';
+import '../core/api_service.dart';
 import 'sign_in.dart';
 import 'main_screen.dart';
 
@@ -13,9 +13,8 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  int _roleValue = 0; // 0: Traveler, 1: Guide
-  final _formKey = GlobalKey<FormState>();
-  
+  int _roleValue = 0;
+
   // Controllers for text fields
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -39,72 +38,53 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _signUp() async {
     // Validate inputs
-    if (_firstNameController.text.trim().isEmpty) {
-      _showError('Please enter your first name');
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
+      _showError('Vui lòng điền đầy đủ thông tin');
       return;
     }
-    if (_lastNameController.text.trim().isEmpty) {
-      _showError('Please enter your last name');
+    if (!email.contains('@')) {
+      _showError('Email không hợp lệ');
       return;
     }
-    if (_countryController.text.trim().isEmpty) {
-      _showError('Please enter your country');
+    if (password.length < 6) {
+      _showError('Mật khẩu phải ít nhất 6 ký tự');
       return;
     }
-    if (_emailController.text.trim().isEmpty) {
-      _showError('Please enter your email');
-      return;
-    }
-    if (!_emailController.text.contains('@')) {
-      _showError('Please enter a valid email');
-      return;
-    }
-    if (_passwordController.text.length < 6) {
-      _showError('Password must be at least 6 characters');
-      return;
-    }
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showError('Passwords do not match');
+    if (password != confirmPassword) {
+      _showError('Mật khẩu xác nhận không khớp');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      // Save user data
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('firstName', _firstNameController.text.trim());
-      await prefs.setString('lastName', _lastNameController.text.trim());
-      await prefs.setString('country', _countryController.text.trim());
-      await prefs.setString('email', _emailController.text.trim());
-      await prefs.setString('password', _passwordController.text);
-      await prefs.setString('role', _roleValue == 0 ? 'Traveler' : 'Guide');
-      await prefs.setBool('isLoggedIn', true);
+      final name = "$firstName $lastName";
+      await ApiService.signup(name, email, password);
 
-      setState(() => _isLoading = false);
-
-      // Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Account created successfully!'),
+            content: Text('Đăng ký tài khoản thành công!'),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
           ),
         );
 
-        // Navigate to main screen
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      _showError('An error occurred. Please try again.');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showError(e.toString().replaceAll('Exception: ', ''));
+      }
     }
   }
 
@@ -138,33 +118,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Radio Buttons
-                  Row(
-                    children: [
-                      Radio(
-                        value: 0,
-                        groupValue: _roleValue,
-                        activeColor: primaryColor,
-                        onChanged: (val) =>
-                            setState(() => _roleValue = val as int),
-                      ),
-                      const Text(
-                        'Traveler',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 20),
-                      Radio(
-                        value: 1,
-                        groupValue: _roleValue,
-                        activeColor: primaryColor,
-                        onChanged: (val) =>
-                            setState(() => _roleValue = val as int),
-                      ),
-                      const Text(
-                        'Guide',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  RadioGroup<int>(
+                    groupValue: _roleValue,
+                    onChanged: (val) => setState(() => _roleValue = val ?? 0),
+                    child: Row(
+                      children: const [
+                        Radio(value: 0, activeColor: primaryColor),
+                        Text(
+                          'Traveler',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(width: 20),
+                        Radio(value: 1, activeColor: primaryColor),
+                        Text(
+                          'Guide',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
 

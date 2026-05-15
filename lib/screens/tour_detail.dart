@@ -104,7 +104,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+              colors: [Colors.black.withValues(alpha: 0.5), Colors.transparent],
             ),
           ),
         ),
@@ -166,7 +166,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       width: isActive ? 20 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? primaryColor : Colors.white.withOpacity(0.5),
+        color: isActive ? primaryColor : Colors.white.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -261,7 +261,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 5),

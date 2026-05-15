@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../core/api_service.dart';
+import 'sign_in.dart';
 import 'edit_profile.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -10,7 +12,35 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String _name = 'Loading...';
+  String? _avatar;
   bool _notifEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final name = await ApiService.getUserName();
+    final avatar = await ApiService.getUserAvatar();
+    setState(() {
+      _name = name ?? 'User';
+      _avatar = avatar;
+    });
+  }
+
+  void _handleSignOut() async {
+    await ApiService.logout();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,26 +71,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             child: Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 25,
-                  backgroundImage: NetworkImage(
-                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-                  ),
+                  backgroundImage: (_avatar != null && _avatar!.isNotEmpty)
+                      ? NetworkImage(_avatar!)
+                      : const NetworkImage(
+                          'https://picsum.photos/seed/profile/150',
+                        ),
                 ),
                 const SizedBox(width: 15),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Yoo Jin',
-                        style: TextStyle(
+                        _name,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Traveler',
                         style: TextStyle(color: Colors.white70, fontSize: 13),
                       ),
@@ -68,14 +100,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen(),
-                    ),
-                  ),
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfileScreen(),
+                      ),
+                    );
+                    _loadUserData(); // Refresh data after returning
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
@@ -94,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             'Notifications',
             trailing: Switch(
               value: _notifEnabled,
-              activeColor: primaryColor,
+              activeThumbColor: primaryColor,
               onChanged: (v) => setState(() => _notifEnabled = v),
             ),
           ),
@@ -105,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildMenuItem(Icons.data_usage, 'Usage'),
           const Spacer(),
           TextButton(
-            onPressed: () {},
+            onPressed: _handleSignOut,
             child: const Text('Sign out', style: TextStyle(color: hintColor)),
           ),
           const SizedBox(height: 30),

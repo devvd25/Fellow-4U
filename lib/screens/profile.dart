@@ -2,8 +2,36 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import 'settings.dart'; // Import trang cài đặt
 
-class ProfileScreen extends StatelessWidget {
+import '../core/api_service.dart';
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String _name = 'Loading...';
+  String _email = '';
+  String? _avatar;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final name = await ApiService.getUserName();
+    final email = await ApiService.getUserEmail();
+    final avatar = await ApiService.getUserAvatar();
+    setState(() {
+      _name = name ?? 'User';
+      _email = email ?? '';
+      _avatar = avatar;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            const SizedBox(height: 50), // Khoảng cách cho avatar lẹm lên
+            const SizedBox(height: 50),
             _buildMyPhotos(),
             const SizedBox(height: 30),
             _buildMyJourneys(),
@@ -25,7 +53,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // 1. Header: Ảnh bìa + Avatar + Icon Cài đặt
   Widget _buildHeader(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
@@ -41,10 +68,13 @@ class ProfileScreen extends StatelessWidget {
           right: 15,
           child: IconButton(
             icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            ),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              _loadUserData(); // Refresh data after returning from settings
+            },
           ),
         ),
         Positioned(
@@ -53,28 +83,29 @@ class ProfileScreen extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 45,
-                backgroundImage: NetworkImage(
-                  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
-                ),
+                backgroundImage: (_avatar != null && _avatar!.isNotEmpty)
+                    ? NetworkImage(_avatar!)
+                    : const NetworkImage(
+                        'https://picsum.photos/seed/profile/150'),
               ),
               const SizedBox(width: 15),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Yoo Jin',
-                      style: TextStyle(
+                      _name,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'yoojin@gmail.com',
-                      style: TextStyle(color: hintColor, fontSize: 13),
+                      _email,
+                      style: const TextStyle(color: hintColor, fontSize: 13),
                     ),
                   ],
                 ),
@@ -86,7 +117,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // 2. Section: My Photos (Cuộn ngang)
   Widget _buildMyPhotos() {
     return Column(
       children: [
@@ -125,7 +155,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // 3. Section: My Journeys (Danh sách dọc)
   Widget _buildMyJourneys() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +190,6 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Collage Image Header
           SizedBox(
             height: 160,
             child: Row(

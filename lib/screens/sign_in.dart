@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../core/widgets.dart';
+import '../core/api_service.dart';
 import 'sign_up.dart';
 import 'forgot_password.dart';
 import 'main_screen.dart'; // Đã thay home.dart thành main_screen.dart
@@ -16,21 +17,32 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _handleLogin() {
-    if (_emailController.text == 'test@gmail.com' &&
-        _passwordController.text == '123456') {
-      // Chuyển thẳng vào MainScreen (trang có thanh menu bên dưới)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sai tài khoản! Thử: test@gmail.com / 123456'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+  void _handleLogin() async {
+    try {
+      final email = _emailController.text;
+      final password = _passwordController.text;
+      
+      if (email.isEmpty || password.isEmpty) {
+        throw Exception('Vui lòng nhập đầy đủ thông tin');
+      }
+
+      await ApiService.login(email, password);
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -44,7 +56,7 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             const CurvedHeader(),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,19 +112,22 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 15),
 
                   // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _socialIcon(const Color(0xFF3B5998), 'f', isIcon: true),
-                      const SizedBox(width: 15),
-                      _socialIcon(
-                        const Color(0xFFFFE812),
-                        'TALK',
-                        textColor: Colors.black,
-                      ),
-                      const SizedBox(width: 15),
-                      _socialIcon(const Color(0xFF00C300), 'LINE'),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _socialIcon(const Color(0xFF3B5998), 'f', isIcon: true),
+                        const SizedBox(width: 15),
+                        _socialIcon(
+                          const Color(0xFFFFE812),
+                          'TALK',
+                          textColor: Colors.black,
+                        ),
+                        const SizedBox(width: 15),
+                        _socialIcon(const Color(0xFF00C300), 'LINE'),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 40),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../core/api_service.dart';
 
 class CreateNewTripScreen extends StatefulWidget {
   const CreateNewTripScreen({super.key});
@@ -9,29 +10,38 @@ class CreateNewTripScreen extends StatefulWidget {
 }
 
 class _CreateNewTripScreenState extends State<CreateNewTripScreen> {
+  final _locationController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
   int _travelerCount = 1;
+  bool _isLoading = false;
 
-  // Danh sách giả lập cho phần Attractions
-  final List<Map<String, dynamic>> _attractions = [
-    {
-      'name': 'Dragon Bridge',
-      'img':
-          'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=400',
-      'selected': true,
-    },
-    {
-      'name': 'Cham Museum',
-      'img':
-          'https://images.unsplash.com/photo-1542314831-c6a4d14b83cc?auto=format&fit=crop&q=80&w=400',
-      'selected': false,
-    },
-    {
-      'name': 'My Khe Beach',
-      'img':
-          'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80&w=400',
-      'selected': true,
-    },
-  ];
+  Future<void> _handleCreateTrip() async {
+    if (_locationController.text.isEmpty || _dateController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng điền địa điểm và ngày')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await ApiService.createTrip({
+        'title': 'Trip to ${_locationController.text}',
+        'location': _locationController.text,
+        'date': _dateController.text, // Backend mong đợi định dạng ISO hoặc chuỗi hợp lệ
+        'time': _timeController.text,
+        'travelers': _travelerCount,
+      });
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tạo chuyến đi thành công!'), backgroundColor: Colors.green));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,363 +50,45 @@ class _CreateNewTripScreenState extends State<CreateNewTripScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: textColor, size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Create New Trip',
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
+        leading: IconButton(icon: const Icon(Icons.close, color: textColor, size: 28), onPressed: () => Navigator.pop(context)),
+        title: const Text('Create New Trip', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildLabeledTextField(
-              label: 'Where you want to explore',
-              hint: 'Danang, Vietnam',
-              icon: Icons.location_on_outlined,
-            ),
-            const SizedBox(height: 20),
-
-            _buildLabeledTextField(
-              label: 'Date',
-              hint: 'mm/dd/yy',
-              icon: Icons.calendar_today_outlined,
-            ),
-            const SizedBox(height: 20),
-
-            // Time Row (From - To)
-            const Text(
-              'Time',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: textColor,
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextFieldOnly(
-                    hint: 'From',
-                    icon: Icons.access_time,
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: _buildTextFieldOnly(
-                    hint: 'To',
-                    icon: Icons.access_time,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25),
-
-            // Number of travelers
-            const Text(
-              'Number of travelers',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                _buildCounterButton(Icons.arrow_drop_down, () {
-                  if (_travelerCount > 1) setState(() => _travelerCount--);
-                }),
-                Container(
-                  width: 50,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey, width: 1),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      '$_travelerCount',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-                _buildCounterButton(Icons.arrow_drop_up, () {
-                  setState(() => _travelerCount++);
-                }),
-              ],
-            ),
-            const SizedBox(height: 25),
-
-            // Fee
-            const Text(
-              'Fee',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: textColor,
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: _buildTextFieldOnly(
-                    hint: 'Fee',
-                    icon: Icons.monetization_on_outlined,
-                  ),
-                ),
-                const SizedBox(width: 15),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    '(\$/hour)',
-                    style: TextStyle(color: textColor, fontSize: 14),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Guide's Language
-            _buildLabeledTextField(
-              label: "Guide's Language",
-              hint: 'Korean, English',
-              icon: Icons.public,
-            ),
-            const SizedBox(height: 25),
-
-            // Attractions Grid
-            const Text(
-              'Attractions',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 15),
-            _buildAttractionsGrid(),
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
-      // Nút DONE cố định ở dưới
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {
-                // Xử lý tạo Trip ở đây
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              child: const Text(
-                'DONE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Helper 1: Label + TextField có gạch dưới
-  Widget _buildLabeledTextField({
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: textColor,
-          ),
-        ),
-        _buildTextFieldOnly(hint: hint, icon: icon),
-      ],
-    );
-  }
-
-  // Helper 2: Chỉ vẽ TextField có gạch dưới
-  Widget _buildTextFieldOnly({required String hint, required IconData icon}) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: textColor),
-        prefixIcon: Icon(icon, color: hintColor, size: 20),
-        prefixIconConstraints: const BoxConstraints(minWidth: 30, minHeight: 0),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 0.5),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: primaryColor, width: 2),
-        ),
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 10),
-      ),
-    );
-  }
-
-  // Helper 3: Nút tăng giảm số lượng
-  Widget _buildCounterButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(icon, color: primaryColor, size: 24),
-      ),
-    );
-  }
-
-  // Helper 4: Lưới Attractions
-  Widget _buildAttractionsGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        childAspectRatio: 1.5, // Tỉ lệ khung hình chữ nhật ngang
-      ),
-      itemCount: _attractions.length + 1, // +1 cho nút Add New
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          // Nút Add New
-          return GestureDetector(
-            onTap: () {},
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator(color: primaryColor))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.add, color: primaryColor),
-                  SizedBox(height: 5),
-                  Text(
-                    'Add New',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabeledTextField(label: 'Where you want to explore', hint: 'Danang, Vietnam', icon: Icons.location_on_outlined, controller: _locationController),
+                  const SizedBox(height: 20),
+                  _buildLabeledTextField(label: 'Date', hint: 'yyyy-mm-dd', icon: Icons.calendar_today_outlined, controller: _dateController),
+                  const SizedBox(height: 20),
+                  _buildLabeledTextField(label: 'Time', hint: '13:00 - 15:00', icon: Icons.access_time, controller: _timeController),
+                  const SizedBox(height: 25),
+                  const Text('Number of travelers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _buildCounterButton(Icons.arrow_drop_down, () { if (_travelerCount > 1) setState(() => _travelerCount--); }),
+                      Container(width: 50, alignment: Alignment.center, decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Text('$_travelerCount', style: const TextStyle(fontSize: 16)))),
+                      _buildCounterButton(Icons.arrow_drop_up, () { setState(() => _travelerCount++); }),
+                    ],
                   ),
+                  const SizedBox(height: 40),
+                  SizedBox(width: double.infinity, height: 50, child: ElevatedButton(onPressed: _handleCreateTrip, style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))), child: const Text('DONE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
                 ],
               ),
             ),
-          );
-        }
-
-        // Các thẻ Attraction
-        final attr = _attractions[index - 1];
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              attr['selected'] = !attr['selected'];
-            });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage(attr['img']),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Phủ mờ để đọc chữ
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.7),
-                      ],
-                    ),
-                  ),
-                ),
-                // Tên địa điểm
-                Positioned(
-                  bottom: 10,
-                  left: 10,
-                  right: 10,
-                  child: Text(
-                    attr['name'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                // Icon Checkmark
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: attr['selected']
-                          ? primaryColor
-                          : Colors.black.withOpacity(0.3),
-                    ),
-                    padding: const EdgeInsets.all(2),
-                    child: Icon(
-                      Icons.check,
-                      size: 14,
-                      color: attr['selected'] ? Colors.white : Colors.white54,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
+  }
+
+  Widget _buildLabeledTextField({required String label, required String hint, required IconData icon, required TextEditingController controller}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)), TextField(controller: controller, decoration: InputDecoration(hintText: hint, prefixIcon: Icon(icon, color: hintColor, size: 20), enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 0.5)), focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: primaryColor, width: 2)), isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 10)))]);
+  }
+
+  Widget _buildCounterButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(4)), child: Icon(icon, color: primaryColor, size: 24)));
   }
 }

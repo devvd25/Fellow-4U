@@ -43,3 +43,24 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+*.key
+*.pem
+secrets.*
+
+# Local backend artifacts
+node_modules/
+backend/node_modules/
+*.sqlite
+*.sqlite-*
+*.db
+
+# Local documents
+*.docx

@@ -185,7 +185,7 @@ class GuideDetailScreen extends StatelessWidget {
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
-              Container(color: Colors.black.withOpacity(0.2), height: 160),
+              Container(color: Colors.black.withValues(alpha: 0.2), height: 160),
               const Icon(Icons.play_circle_fill, color: primaryColor, size: 50),
             ],
           ),

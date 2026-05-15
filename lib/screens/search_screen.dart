@@ -355,7 +355,7 @@ class _SearchScreenState extends State<SearchScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -461,7 +461,7 @@ class FilterBottomSheet extends StatefulWidget {
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   int _tabIndex = 0; // 0: Guides, 1: Tours
-  List<String> _selectedLanguages = ['Vietnamese']; // Mặc định chọn Tiếng Việt
+  final List<String> _selectedLanguages = ['Vietnamese']; // Mặc định chọn Tiếng Việt
 
   final List<String> _languages = [
     'Vietnamese',
