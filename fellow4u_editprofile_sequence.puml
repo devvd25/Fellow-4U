@@ -52,7 +52,7 @@ alt Người dùng chọn ảnh mới
     EP -> U: Hiển thị ảnh preview mới
   end
 else Không đổi ảnh
-endif
+end
 
 U -> EP: Nhấn nút "SAVE"
 EP -> EP: Validate dữ liệu (name, phone, location)
