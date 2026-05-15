@@ -19,30 +19,26 @@ alt Validate thất bại
 else Validate thành công
   LS -> API: post(/auth/login, {email, password})
   API -> BE: HTTP POST /auth/login
-  BE -> BE: Receive request
+  BE -> BE: Validate email format & password exists
 
-  BE -> DB: findOne(email)
-  DB -> BE: Return user or null
+  alt Dữ liệu không hợp lệ
+    BE -> API: 400 Bad Request {message}
+    API -> LS: 400 Error
+    LS -> U: Hiển thị lỗi "Email không hợp lệ" hoặc "Password bắt buộc"
+  else Dữ liệu hợp lệ
+    BE -> DB: findOne({email: normalizedEmail})
+    DB -> BE: Return user or null
 
-  alt Email không tồn tại
-    BE -> BE: Return 401 Unauthorized
-    BE -> API: 401 (Invalid email or password)
-    API -> LS: 401 Error
-    LS -> U: Hiển thị "Email hoặc mật khẩu sai"
-  else Email tồn tại
-    BE -> BE: comparePassword(inputPassword, hashPassword)
-
-    alt Password sai
-      BE -> BE: Return 401 Unauthorized
-      BE -> API: 401 (Invalid email or password)
+    alt Email không tồn tại hoặc Password sai
+      BE -> API: 401 Unauthorized {message: "Invalid email or password"}
       API -> LS: 401 Error
       LS -> U: Hiển thị "Email hoặc mật khẩu sai"
-    else Password đúng
-      BE -> BE: Generate JWT token
-      BE -> API: 200 OK {token, user_id, name, email, avatar}
+    else Email tồn tại và Password đúng
+      BE -> BE: Generate JWT token (expiresIn: 30d)
+      BE -> API: 200 OK {id, name, email, avatar, token}
       API -> LS: Response token & user info
       LS -> LS: Save token to Local Storage
-      LS -> LS: Save user info
+      LS -> LS: Save user info (id, name, email, avatar)
       LS -> U: Hiển thị "Đăng nhập thành công!"
       LS -> LS: Navigate to MainScreen
     end
