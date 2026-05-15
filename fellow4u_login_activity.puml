@@ -26,35 +26,36 @@ repeat while (Dữ liệu chưa hợp lệ?) is (Có)
 
 :Nhấn nút "Login";
 :Gửi POST /auth/login đến backend;
+:Kèm theo {email, password};
 :Backend nhận request;
 
-:Mã hóa password nhập vào;
-:Kiểm tra thông tin trong database;
+:Backend validate dữ liệu;
+if (Email hoặc Password không hợp lệ?) then (Có)
+  :Trả lỗi 400 {message};
+  :Hiển thị thông báo lỗi;
+  :Người dùng sửa;
+  repeat
+  repeat while (Thử lại?) is (Có)
+else (Không)
+endif
 
-if (Email tồn tại?) then (Không)
-  :Trả lỗi 401 "Email không tồn tại";
+:Tìm kiếm user trong database;
+:So sánh password với mật khẩu đã mã hóa;
+
+if (User tồn tại AND Password đúng?) then (Không)
+  :Trả lỗi 401 "Invalid email or password";
   :Hiển thị thông báo lỗi;
   repeat
   repeat while (Thử lại?) is (Có)
 else (Có)
 endif
 
-:So sánh password với mật khẩu trong DB;
-
-if (Password đúng?) then (Không)
-  :Trả lỗi 401 "Mật khẩu sai";
-  :Hiển thị thông báo lỗi;
-  repeat
-  repeat while (Thử lại?) is (Có)
-else (Có)
-endif
-
-:Sinh JWT token;
-:Trả token + thông tin user;
-:Ứng dụng nhận token;
+:Sinh JWT token (expiresIn: 30d);
+:Trả 200 {id, name, email, avatar, token};
+:Ứng dụng nhận dữ liệu;
 
 :Lưu token vào Local Storage;
-:Lưu thông tin user (name, email, avatar);
+:Lưu user info (id, name, email, avatar);
 :Hiển thị thông báo "Đăng nhập thành công!";
 :Chuyển đến màn hình chính;
 
