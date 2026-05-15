@@ -6,7 +6,7 @@ skinparam defaultFontSize 14
 
 start
 :Người dùng vào màn hình "Edit Profile";
-:Hệ thống tải thông tin từ Server;
+:Tải thông tin user từ Local Storage;
 :Hiển thị các trường (Name, Phone, Location, Avatar...);
 
 :Người dùng thay đổi thông tin;
@@ -23,27 +23,34 @@ if (Cần thay đổi ảnh đại diện?) then (Có)
   else (Có)
   endif
 
-  :Gửi yêu cầu POST /api/upload;
+  :Gửi POST /api/upload;
   :Gửi file ảnh (multipart/form-data);
-  :Backend nhận và validate ảnh;
+  :Backend nhận file;
+  :Validate file (size, type);
   :Upload lên Cloudinary;
-  :Nhận URL ảnh mới;
-  :Hiển thị ảnh preview mới;
+
+  if (Upload thành công?) then (Có)
+    :Nhận URL ảnh từ Cloudinary;
+    :Hiển thị ảnh preview mới;
+  else (Không)
+    :Trả lỗi 500 "Upload failed";
+    :Hiển thị thông báo lỗi;
+  endif
 else (Không)
 endif
 
 :Nhấn nút "SAVE";
 
-if (Dữ liệu hợp lệ?) then (Không)
-  :Hiển thị lỗi validate phía client;
+if (Dữ liệu hợp lệ phía client?) then (Không)
+  :Hiển thị lỗi validate;
   :Người dùng sửa;
   repeat
   repeat while (Dữ liệu còn lỗi?) is (Có)
 else (Có)
 endif
 
-:Gửi yêu cầu PATCH /auth/update;
-:Kèm theo JWT token;
+:Gửi PATCH /auth/update;
+:Kèm theo {name, phone, location, avatar, password, JWT token};
 :Backend nhận request;
 
 if (JWT token hợp lệ?) then (Không)
@@ -54,21 +61,50 @@ else (Có)
 endif
 
 :Backend validate dữ liệu;
-:Cập nhật thông tin user trong database SQLite;
+if (Có field không hợp lệ?) then (Có)
+  :Trả lỗi 400 {message};
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
 
-if (Cập nhật thành công?) then (Có)
-  :Trả kết quả 200 thành công;
-  :Trả thông tin user đã cập nhật;
+if (Name được gửi AND Name < 2 ký tự?) then (Có)
+  :Trả lỗi 400 "Name must be at least 2 characters";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+if (Password được gửi AND Password < 6 ký tự?) then (Có)
+  :Trả lỗi 400 "Password must be at least 6 characters";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+:Tìm user trong database;
+
+if (User không tồn tại?) then (Có)
+  :Trả lỗi 404 "User not found";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+:Cập nhật các field được gửi;
+:Lưu vào database SQLite;
+
+if (Lưu thành công?) then (Có)
+  :Trả 200 {id, name, email, phone, location, avatar};
+  :Ứng dụng nhận dữ liệu mới;
+  :Cập nhật Local Storage;
+  :Hiển thị thông báo "Cập nhật hồ sơ thành công";
+  :Quay lại màn hình hồ sơ;
 else (Không)
   :Trả lỗi 500 "Lỗi hệ thống";
   :Hiển thị thông báo "Cập nhật thất bại";
   stop
 endif
-
-:Ứng dụng nhận dữ liệu mới;
-:Cập nhật thông tin hồ sơ;
-:Hiển thị thông báo "Cập nhật hồ sơ thành công";
-:Quay lại màn hình hồ sơ;
 
 stop
 
