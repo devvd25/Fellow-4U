@@ -1,72 +1,41 @@
 @startuml Fellow4U_Architecture_Simple
 
-!define MOBILE_COLOR #E3F2FD
-!define BACKEND_COLOR #FFF3E0
-!define DATABASE_COLOR #F3E5F5
-
 skinparam backgroundColor #FFFFFF
 skinparam linetype ortho
+skinparam componentStyle rectangle
 
-package "📱 FLUTTER MOBILE APP" #MOBILE_COLOR {
-  component "UI Screens" as MobileUI [
-    Sign In/Up
-    Chat, Trips
-    Profile, Explore
-  ]
-  component "Services & API" as MobileServices [
-    ApiService
-    Auth Service
-  ]
-  component "Local Storage" as MobileStorage [
-    Token, User Info
-  ]
+package "Mobile App (Flutter)" {
+  component "UI Screens" as UI
+  component "Services (API)" as Services
+  component "Local Storage" as Storage
+  UI --> Services
+  Services --> Storage
 }
 
-package "🌐 NETWORK" #E0E0E0 {
-  component "HTTP/REST API (JSON)" as Network
+package "Network" {
+  component "HTTP REST API" as Network
 }
 
-package "🖥️ EXPRESS.JS BACKEND" #BACKEND_COLOR {
-  component "Routes" as Routes [
-    /auth
-    /api/*
-  ]
-  component "Middleware" as Middleware [
-    JWT Auth
-    Upload Cloudinary
-  ]
-  component "Controllers" as Controllers [
-    Auth, Chat
-    Trip, Core
-  ]
-  component "Models (ORM)" as Models [
-    Sequelize
-  ]
+package "Backend (Express)" {
+  component "Routes" as Routes
+  component "Middleware (Auth)" as Middleware
+  component "Controllers" as Controllers
+  component "Models" as Models
+
+  Routes --> Middleware
+  Middleware --> Controllers
+  Controllers --> Models
 }
 
-package "💾 DATA STORAGE" #DATABASE_COLOR {
-  component "SQLite Database" as SQLite [
-    Users, Trips
-    Messages, Chats
-    News, Tours
-  ]
-  component "Cloudinary" as Cloudinary [
-    Image Storage
-  ]
+package "Database" {
+  component "SQLite" as SQLite
+  component "Cloudinary" as Cloud
 }
 
-MobileUI --> MobileServices
-MobileServices --> MobileStorage
-MobileServices --> Network: HTTP Request
-
-Network --> Routes
-Routes --> Middleware
-Middleware --> Controllers
-Controllers --> Models
-
-Models --> SQLite
-Models --> Cloudinary
-
-Controllers --> Network: Response JSON
+Services --> Network: HTTP Request
+Network --> Routes: API Call
+Controllers --> SQLite: Query
+Controllers --> Cloud: Upload
+Network <-- Controllers: Response
 
 @enduml
