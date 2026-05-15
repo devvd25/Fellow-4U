@@ -1,0 +1,57 @@
+@startuml Fellow4U_SignUp_Sequence
+
+!define RECTANGLE rectangle
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+
+participant "User" as U
+participant "SignUpScreen\n(Flutter)" as SS
+participant "ApiService\n(HTTP)" as API
+participant "Express\nBackend" as BE
+participant "SQLite\nDatabase" as DB
+
+U -> SS: Nhập name, email, password
+U -> SS: Nhập confirm password
+U -> SS: Nhấn nút "Sign Up"
+SS -> SS: Validate dữ liệu local (name, email, password, confirm)
+
+alt Validate thất bại
+  SS -> U: Hiển thị lỗi validate
+else Validate thành công
+  SS -> API: post(/auth/signup, {name, email, password})
+  API -> BE: HTTP POST /auth/signup
+  BE -> BE: Receive request
+
+  BE -> DB: findOne(email)
+  DB -> BE: Return user or null
+
+  alt Email đã tồn tại
+    BE -> BE: Return 400 Bad Request
+    BE -> API: 400 (Email already exists)
+    API -> SS: 400 Error
+    SS -> U: Hiển thị "Email đã được đăng ký"
+  else Email chưa tồn tại
+    BE -> BE: Hash password with bcryptjs
+    BE -> BE: Create new user object
+
+    BE -> DB: Insert user (name, email, hashedPassword)
+    DB -> BE: Return created user with id
+
+    alt Insert thành công
+      BE -> BE: Generate JWT token
+      BE -> API: 201 Created {token, userId, name, email}
+      API -> SS: Response token & user info
+      SS -> SS: Save token to Local Storage
+      SS -> SS: Save user info
+      SS -> U: Hiển thị "Đăng ký thành công!"
+      SS -> SS: Navigate to MainScreen
+    else Insert thất bại
+      BE -> BE: Return 500 Server Error
+      BE -> API: 500 Error
+      API -> SS: 500 Error
+      SS -> U: Hiển thị "Lỗi hệ thống, đăng ký thất bại"
+    end
+  end
+end
+
+@enduml

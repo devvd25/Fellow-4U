@@ -1,0 +1,91 @@
+@startuml Fellow4U_EditProfile_Sequence
+
+!define RECTANGLE rectangle
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+
+participant "User" as U
+participant "EditProfileScreen\n(Flutter)" as EP
+participant "ApiService\n(HTTP)" as API
+participant "Express\nBackend" as BE
+participant "Cloudinary\n(Storage)" as CLD
+participant "SQLite\nDatabase" as DB
+
+U -> EP: Vào màn hình Edit Profile
+EP -> API: get(/auth/user, {JWT token})
+API -> BE: HTTP GET /auth/user
+BE -> BE: Verify JWT token
+
+alt Token không hợp lệ
+  BE -> API: 401 Unauthorized
+  API -> EP: 401 Error
+  EP -> U: Hiển thị "Phiên đăng nhập hết hạn"
+else Token hợp lệ
+  BE -> DB: findById(userId)
+  DB -> BE: Return user data
+
+  BE -> API: 200 OK {user data}
+  API -> EP: Response user info
+  EP -> U: Hiển thị thông tin user (name, phone, location, avatar)
+end
+
+U -> EP: Thay đổi thông tin
+
+alt Người dùng chọn ảnh mới
+  U -> EP: Nhấn nút chọn ảnh
+  EP -> U: Mở dialog chọn từ thư viện
+  U -> EP: Chọn ảnh
+  EP -> EP: Validate ảnh (format, size)
+
+  alt Ảnh không hợp lệ
+    EP -> U: Hiển thị lỗi validate ảnh
+  else Ảnh hợp lệ
+    EP -> API: post(/api/upload, {file, JWT token})
+    API -> BE: HTTP POST /api/upload (multipart/form-data)
+    BE -> BE: Validate file (size, type)
+    BE -> CLD: Upload file to Cloudinary
+    CLD -> BE: Return image URL
+
+    BE -> API: 200 OK {imageUrl}
+    API -> EP: Response image URL
+    EP -> EP: Update avatar preview
+    EP -> U: Hiển thị ảnh preview mới
+  end
+else Không đổi ảnh
+endif
+
+U -> EP: Nhấn nút "SAVE"
+EP -> EP: Validate dữ liệu (name, phone, location)
+
+alt Validate thất bại
+  EP -> U: Hiển thị lỗi validate
+else Validate thành công
+  EP -> API: patch(/auth/update, {name, phone, location, avatar, JWT token})
+  API -> BE: HTTP PATCH /auth/update
+  BE -> BE: Verify JWT token
+
+  alt Token không hợp lệ
+    BE -> API: 401 Unauthorized
+    API -> EP: 401 Error
+    EP -> U: Hiển thị "Phiên đăng nhập hết hạn"
+  else Token hợp lệ
+    BE -> BE: Validate input data
+
+    BE -> DB: Update user (name, phone, location, avatar)
+    DB -> BE: Return updated user
+
+    alt Update thành công
+      BE -> API: 200 OK {updated user data}
+      API -> EP: Response updated info
+      EP -> EP: Update local user data
+      EP -> U: Hiển thị "Cập nhật hồ sơ thành công"
+      EP -> EP: Navigate back to ProfileScreen
+    else Update thất bại
+      BE -> API: 500 Server Error
+      API -> EP: 500 Error
+      EP -> U: Hiển thị "Lỗi hệ thống, cập nhật thất bại"
+    end
+  end
+end
+
+@enduml

@@ -1,0 +1,57 @@
+@startuml Fellow4U_SendMessage_Sequence
+
+!define RECTANGLE rectangle
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+
+participant "User" as U
+participant "ChatScreen\n(Flutter)" as CS
+participant "ChatService\n(HTTP)" as HTTP
+participant "Express\nBackend" as BE
+participant "SQLite\nDatabase" as DB
+
+U -> CS: Nhập nội dung tin nhắn
+U -> CS: Nhấn nút "Gửi"
+CS -> CS: Validate nội dung (không rỗng)
+
+alt Validate thất bại
+  CS -> U: Hiển thị lỗi "Tin nhắn không được rỗng"
+else Validate thành công
+  CS -> HTTP: post(/api/chat/messages, {conversationId, content, JWT token})
+  HTTP -> BE: HTTP POST /api/chat/messages
+  BE -> BE: Verify JWT token
+
+  alt Token không hợp lệ
+    BE -> BE: Return 401 Unauthorized
+    BE -> HTTP: 401 Error
+    HTTP -> CS: 401 Error
+    CS -> U: Hiển thị "Phiên đăng nhập hết hạn"
+  else Token hợp lệ
+    BE -> BE: Verify conversationId exists
+
+    alt Conversation không tồn tại
+      BE -> BE: Return 404 Not Found
+      BE -> HTTP: 404 Error
+      HTTP -> CS: 404 Error
+      CS -> U: Hiển thị "Cuộc trò chuyện không tồn tại"
+    else Conversation tồn tại
+      BE -> DB: Insert message (conversationId, senderId, content, timestamp)
+      DB -> BE: Return message with id
+
+      alt Insert thành công
+        BE -> HTTP: 201 Created {messageId, content, timestamp, senderInfo}
+        HTTP -> CS: 201 Response với message data
+        CS -> CS: Thêm message vào danh sách
+        CS -> CS: Clear input field
+        CS -> CS: Scroll to bottom
+        CS -> U: Hiển thị tin nhắn mới
+      else Insert thất bại
+        BE -> HTTP: 500 Server Error
+        HTTP -> CS: 500 Error
+        CS -> U: Hiển thị "Lỗi hệ thống, gửi tin nhắn thất bại"
+      end
+    end
+  end
+end
+
+@enduml

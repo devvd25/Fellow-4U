@@ -1,0 +1,62 @@
+@startuml Fellow4U_SignUp_Activity
+!define RECTANGLE rectangle
+skinparam linetype ortho
+
+start
+:Người dùng mở ứng dụng;
+:Chọn đăng ký tài khoản;
+
+repeat
+  :Nhập name, email, password;
+  :Nhập confirm password;
+
+  if (Name hợp lệ?) then (Không)
+    :Hiển thị lỗi Name;
+  else (Có)
+    if (Email hợp lệ?) then (Không)
+      :Hiển thị lỗi Email;
+    else (Có)
+      if (Password >= 6 ký tự?) then (Không)
+        :Hiển thị lỗi Password;
+      else (Có)
+        if (Confirm == Password?) then (Không)
+          :Hiển thị lỗi Confirm;
+        else (Có)
+          break
+        endif
+      endif
+    endif
+  endif
+
+repeat while (Validate lỗi?) is (Có)
+
+:Gửi POST /auth/signup;
+:Backend nhận request;
+
+if (Email tồn tại?) then (Có)
+  :Trả lỗi 400;
+  :Hiển thị thông báo;
+  repeat
+  repeat while (Thử lại?) is (Có)
+else (Không)
+endif
+
+:Mã hóa password (bcryptjs);
+:Tạo user mới;
+
+if (Lưu thành công?) then (Có)
+  :Sinh JWT token;
+  :Trả token;
+else (Không)
+  :Trả lỗi 500;
+  :Hiển thị lỗi hệ thống;
+  stop
+endif
+
+:Lưu token Local Storage;
+:Chuyển màn hình chính;
+:Hiển thị thông báo thành công;
+
+stop
+
+@enduml

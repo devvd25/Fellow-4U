@@ -1,0 +1,75 @@
+@startuml Fellow4U_EditProfile_Activity
+scale 1.5
+!define RECTANGLE rectangle
+skinparam linetype ortho
+skinparam defaultFontSize 14
+
+start
+:Người dùng vào màn hình "Edit Profile";
+:Hệ thống tải thông tin từ Server;
+:Hiển thị các trường (Name, Phone, Location, Avatar...);
+
+:Người dùng thay đổi thông tin;
+
+if (Cần thay đổi ảnh đại diện?) then (Có)
+  :Nhấn nút chọn ảnh;
+  :Mở dialog "Chọn ảnh từ thư viện";
+  :Người dùng chọn ảnh;
+
+  if (Ảnh hợp lệ?) then (Không)
+    :Hiển thị lỗi "Định dạng hoặc kích thước không hợp lệ";
+    repeat
+    repeat while (Chọn ảnh khác?) is (Có)
+  else (Có)
+  endif
+
+  :Gửi yêu cầu POST /api/upload;
+  :Gửi file ảnh (multipart/form-data);
+  :Backend nhận và validate ảnh;
+  :Upload lên Cloudinary;
+  :Nhận URL ảnh mới;
+  :Hiển thị ảnh preview mới;
+else (Không)
+endif
+
+:Nhấn nút "SAVE";
+
+if (Dữ liệu hợp lệ?) then (Không)
+  :Hiển thị lỗi validate phía client;
+  :Người dùng sửa;
+  repeat
+  repeat while (Dữ liệu còn lỗi?) is (Có)
+else (Có)
+endif
+
+:Gửi yêu cầu PATCH /auth/update;
+:Kèm theo JWT token;
+:Backend nhận request;
+
+if (JWT token hợp lệ?) then (Không)
+  :Trả lỗi 401 "Không được phép";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Backend validate dữ liệu;
+:Cập nhật thông tin user trong database SQLite;
+
+if (Cập nhật thành công?) then (Có)
+  :Trả kết quả 200 thành công;
+  :Trả thông tin user đã cập nhật;
+else (Không)
+  :Trả lỗi 500 "Lỗi hệ thống";
+  :Hiển thị thông báo "Cập nhật thất bại";
+  stop
+endif
+
+:Ứng dụng nhận dữ liệu mới;
+:Cập nhật thông tin hồ sơ;
+:Hiển thị thông báo "Cập nhật hồ sơ thành công";
+:Quay lại màn hình hồ sơ;
+
+stop
+
+@enduml

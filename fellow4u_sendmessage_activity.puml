@@ -1,0 +1,63 @@
+@startuml Fellow4U_SendMessage_Activity
+scale 1.5
+!define RECTANGLE rectangle
+skinparam linetype ortho
+skinparam defaultFontSize 14
+
+start
+:Người dùng chọn cuộc trò chuyện;
+:Hệ thống tải danh sách tin nhắn cũ;
+:Hiển thị danh sách tin nhắn;
+
+repeat
+  :Người dùng nhập nội dung tin nhắn;
+
+  if (Nội dung không rỗng?) then (Không)
+    :Hiển thị thông báo "Tin nhắn không được rỗng";
+  else (Có)
+    break
+  endif
+
+repeat while (Cần nhập lại?) is (Có)
+
+:Nhấn nút "Gửi";
+:Gửi yêu cầu POST /api/chat/messages;
+:Kèm theo JWT token;
+:Backend nhận request;
+
+if (JWT token hợp lệ?) then (Không)
+  :Trả lỗi 401 "Không được phép";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Kiểm tra conversationId tồn tại;
+
+if (Conversation tồn tại?) then (Không)
+  :Trả lỗi 404 "Cuộc trò chuyện không tồn tại";
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Lưu tin nhắn vào database SQLite;
+
+if (Lưu thành công?) then (Có)
+  :Trả kết quả 201 thành công;
+  :Trả thông tin message mới;
+else (Không)
+  :Trả lỗi 500 "Lỗi hệ thống";
+  :Hiển thị thông báo lỗi;
+  stop
+endif
+
+:Ứng dụng nhận message mới;
+:Xóa nội dung input;
+:Cập nhật danh sách tin nhắn;
+:Hiển thị tin nhắn mới trong chat;
+:Tự động cuộn xuống cuối danh sách;
+
+stop
+
+@enduml

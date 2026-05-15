@@ -1,0 +1,76 @@
+@startuml Fellow4U_UseCase_Diagram
+
+left to right direction
+skinparam actorBackgroundColor #FFE4B5
+skinparam usecaseBackgroundColor #E1F5FF
+
+actor "Khách du lịch\n(Traveler)" as T
+actor "Hướng dẫn viên\n(Guide)" as G
+
+rectangle "Fellow4U" {
+  usecase "Đăng ký tài khoản" as UC01
+  usecase "Đăng nhập" as UC02
+  usecase "Cập nhật hồ sơ cá nhân" as UC03
+  usecase "Xem danh sách tour" as UC04
+  usecase "Xem chi tiết tour" as UC05
+  usecase "Tạo chuyến đi" as UC06
+  usecase "Xem chuyến đi của tôi" as UC07
+  usecase "Xem danh sách hướng dẫn viên" as UC08
+  usecase "Xem profile hướng dẫn viên" as UC09
+  usecase "Tìm kiếm hướng dẫn viên" as UC10
+  usecase "Tạo hội thoại với GV" as UC11
+  usecase "Gửi tin nhắn" as UC12
+  usecase "Nhận tin nhắn" as UC13
+  usecase "Upload ảnh đại diện" as UC14
+  usecase "Xem tin tức du lịch" as UC15
+  usecase "Đăng xuất" as UC16
+
+  usecase "Cập nhật hồ sơ GV" as UC17
+  usecase "Xem tour của mình" as UC18
+  usecase "Tạo/Chỉnh sửa tour" as UC19
+  usecase "Xem danh sách khách du lịch liên hệ" as UC20
+  usecase "Trả lời tin nhắn khách" as UC21
+  usecase "Upload ảnh tour" as UC22
+}
+
+' Traveler use cases
+T --> UC01
+T --> UC02
+T --> UC03
+T --> UC04
+T --> UC05
+T --> UC06
+T --> UC07
+T --> UC08
+T --> UC09
+T --> UC10
+T --> UC11
+T --> UC12
+T --> UC13
+T --> UC14
+T --> UC15
+T --> UC16
+
+' Guide use cases
+G --> UC01
+G --> UC02
+G --> UC17
+G --> UC18
+G --> UC19
+G --> UC20
+G --> UC21
+G --> UC22
+G --> UC13
+
+' Include relationships
+UC02 .> UC03 : include
+UC08 .> UC09 : include
+UC09 .> UC10 : include
+UC11 .> UC12 : include
+UC12 .> UC13 : include
+UC03 .> UC14 : include
+UC04 .> UC05 : include
+UC19 .> UC22 : include
+UC21 .> UC13 : include
+
+@enduml

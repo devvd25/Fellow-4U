@@ -8,14 +8,14 @@ const apiRoutes = require('./routes/apiRoutes');
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:8080,http://localhost:5173')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true);
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      return callback(null, true);
+    }
+    const allowed = process.env.CORS_ORIGIN?.split(',').map((o) => o.trim()) || [];
+    if (allowed.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));

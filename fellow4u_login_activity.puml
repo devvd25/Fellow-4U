@@ -1,0 +1,63 @@
+@startuml Fellow4U_Login_Activity
+scale 1.5
+!define RECTANGLE rectangle
+skinparam linetype ortho
+skinparam defaultFontSize 14
+
+start
+:Người dùng mở ứng dụng;
+:Chọn đăng nhập;
+
+repeat
+  :Nhập email;
+  :Nhập password;
+
+  if (Email hợp lệ?) then (Không)
+    :Hiển thị lỗi "Email không hợp lệ";
+  else (Có)
+    if (Password không rỗng?) then (Không)
+      :Hiển thị lỗi "Password không được rỗng";
+    else (Có)
+      break
+    endif
+  endif
+
+repeat while (Dữ liệu chưa hợp lệ?) is (Có)
+
+:Nhấn nút "Login";
+:Gửi POST /auth/login đến backend;
+:Backend nhận request;
+
+:Mã hóa password nhập vào;
+:Kiểm tra thông tin trong database;
+
+if (Email tồn tại?) then (Không)
+  :Trả lỗi 401 "Email không tồn tại";
+  :Hiển thị thông báo lỗi;
+  repeat
+  repeat while (Thử lại?) is (Có)
+else (Có)
+endif
+
+:So sánh password với mật khẩu trong DB;
+
+if (Password đúng?) then (Không)
+  :Trả lỗi 401 "Mật khẩu sai";
+  :Hiển thị thông báo lỗi;
+  repeat
+  repeat while (Thử lại?) is (Có)
+else (Có)
+endif
+
+:Sinh JWT token;
+:Trả token + thông tin user;
+:Ứng dụng nhận token;
+
+:Lưu token vào Local Storage;
+:Lưu thông tin user (name, email, avatar);
+:Hiển thị thông báo "Đăng nhập thành công!";
+:Chuyển đến màn hình chính;
+
+stop
+
+@enduml

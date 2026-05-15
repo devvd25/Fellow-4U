@@ -1,0 +1,52 @@
+@startuml Fellow4U_Login_Sequence
+
+!define RECTANGLE rectangle
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+
+participant "User" as U
+participant "LoginScreen\n(Flutter)" as LS
+participant "ApiService\n(HTTP)" as API
+participant "Express\nBackend" as BE
+participant "SQLite\nDatabase" as DB
+
+U -> LS: Nhập email & password
+U -> LS: Nhấn nút "Login"
+LS -> LS: Validate dữ liệu local
+
+alt Validate thất bại
+  LS -> U: Hiển thị lỗi validate
+else Validate thành công
+  LS -> API: post(/auth/login, {email, password})
+  API -> BE: HTTP POST /auth/login
+  BE -> BE: Receive request
+
+  BE -> DB: findOne(email)
+  DB -> BE: Return user or null
+
+  alt Email không tồn tại
+    BE -> BE: Return 401 Unauthorized
+    BE -> API: 401 (Invalid email or password)
+    API -> LS: 401 Error
+    LS -> U: Hiển thị "Email hoặc mật khẩu sai"
+  else Email tồn tại
+    BE -> BE: comparePassword(inputPassword, hashPassword)
+
+    alt Password sai
+      BE -> BE: Return 401 Unauthorized
+      BE -> API: 401 (Invalid email or password)
+      API -> LS: 401 Error
+      LS -> U: Hiển thị "Email hoặc mật khẩu sai"
+    else Password đúng
+      BE -> BE: Generate JWT token
+      BE -> API: 200 OK {token, user_id, name, email, avatar}
+      API -> LS: Response token & user info
+      LS -> LS: Save token to Local Storage
+      LS -> LS: Save user info
+      LS -> U: Hiển thị "Đăng nhập thành công!"
+      LS -> LS: Navigate to MainScreen
+    end
+  end
+end
+
+@enduml
