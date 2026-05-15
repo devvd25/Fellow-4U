@@ -1,0 +1,111 @@
+@startuml Fellow4U_ERD
+
+skinparam linetype ortho
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+hide methods
+hide stereotypes
+
+' ===== AUTH MODULE =====
+entity Users {
+  * id : UUID <<PK>>
+  --
+  name : TEXT NOT NULL
+  email : TEXT NOT NULL UNIQUE
+  password : TEXT NOT NULL
+  phone : TEXT
+  avatar : TEXT
+  location : TEXT
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+' ===== TRIPS MODULE =====
+entity Trips {
+  * id : UUID <<PK>>
+  * userId : UUID <<FK>>
+  --
+  title : TEXT NOT NULL
+  location : TEXT
+  date : TEXT
+  time : TEXT
+  adults : INTEGER DEFAULT 1
+  children : INTEGER DEFAULT 0
+  status : ENUM('planned','ongoing','completed')
+  imageUrl : TEXT
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+' ===== TOURS MODULE =====
+entity Tours {
+  * id : UUID <<PK>>
+  --
+  title : TEXT NOT NULL
+  price : DECIMAL(10,2) NOT NULL
+  description : TEXT
+  imageUrl : TEXT
+  location : TEXT
+  duration : TEXT
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+' ===== MESSAGING MODULE =====
+entity Conversations {
+  * id : UUID <<PK>>
+  --
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+entity Messages {
+  * id : UUID <<PK>>
+  * conversationId : UUID <<FK>>
+  * senderId : UUID <<FK>>
+  --
+  text : TEXT NOT NULL
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+entity UserConversations {
+  * userId : UUID <<FK>>
+  * conversationId : UUID <<FK>>
+  --
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+' ===== NEWS MODULE =====
+entity News {
+  * id : UUID <<PK>>
+  --
+  title : TEXT NOT NULL
+  content : TEXT
+  imageUrl : TEXT
+  date : DATETIME DEFAULT CURRENT_TIMESTAMP
+  createdAt : DATETIME
+  updatedAt : DATETIME
+}
+
+' ===== RELATIONSHIPS =====
+
+' User - Trip
+Users ||--o{ Trips : creates
+
+' User - Messages
+Users ||--o{ Messages : sends
+
+' User - Conversations (Many-to-Many)
+Users }o--o{ Conversations : participates
+
+' Conversations - Messages
+Conversations ||--o{ Messages : contains
+
+' UserConversations Join Table
+UserConversations }o--|| Users : references
+UserConversations }o--|| Conversations : references
+
+@enduml
