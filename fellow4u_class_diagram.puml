@@ -1,0 +1,92 @@
+@startuml Fellow4U_Class_Diagram
+
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam classFontSize 11
+skinparam classBackgroundColor #F5F5F5
+skinparam classBorderColor #333333
+
+class User {
+  -id : UUID <<PK>>
+  -name : String <<NOT NULL>>
+  -email : String <<NOT NULL, UNIQUE>>
+  -password : String <<NOT NULL>>
+  -phone : String
+  -avatar : String (URL)
+  -location : String
+  -createdAt : DateTime
+  -updatedAt : DateTime
+  --
+  +comparePassword(password) : Boolean
+}
+
+class Tour {
+  -id : UUID <<PK>>
+  -title : String <<NOT NULL>>
+  -price : Decimal(10,2) <<NOT NULL>>
+  -description : Text
+  -imageUrl : String (URL)
+  -location : String
+  -duration : String
+  -createdAt : DateTime
+  -updatedAt : DateTime
+}
+
+class Trip {
+  -id : UUID <<PK>>
+  -userId : UUID <<FK>>
+  -title : String <<NOT NULL>>
+  -location : String
+  -date : String
+  -time : String
+  -adults : Integer (default: 1)
+  -children : Integer (default: 0)
+  -status : Enum (planned|ongoing|completed)
+  -imageUrl : String (URL)
+  -createdAt : DateTime
+  -updatedAt : DateTime
+}
+
+class News {
+  -id : UUID <<PK>>
+  -title : String <<NOT NULL>>
+  -content : Text
+  -imageUrl : String (URL)
+  -date : DateTime (default: NOW)
+  -createdAt : DateTime
+  -updatedAt : DateTime
+}
+
+class Conversation {
+  -id : UUID <<PK>>
+  -createdAt : DateTime
+  -updatedAt : DateTime
+}
+
+class Message {
+  -id : UUID <<PK>>
+  -conversationId : UUID <<FK>>
+  -senderId : UUID <<FK>>
+  -text : Text <<NOT NULL>>
+  -createdAt : DateTime
+  -updatedAt : DateTime
+}
+
+class UserConversation {
+  -userId : UUID <<FK>>
+  -conversationId : UUID <<FK>>
+  --
+  <<join table>>
+}
+
+User "1" --> "0..*" Trip : creates
+User "1" --> "0..*" Message : sends
+User "0..*" --> "0..*" Conversation : participates
+Conversation "1" --> "1..*" Message : contains
+Message "0..*" --> "1" User : sentBy
+
+UserConversation "0..*" --> "1" User
+UserConversation "0..*" --> "1" Conversation
+
+@enduml
