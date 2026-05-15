@@ -21,8 +21,8 @@ repeat
 repeat while (Cần nhập lại?) is (Có)
 
 :Nhấn nút "Gửi";
-:Gửi yêu cầu POST /api/chat/messages;
-:Kèm theo JWT token;
+:Gửi POST /api/chat/messages;
+:Kèm theo {conversationId, text, JWT token};
 :Backend nhận request;
 
 if (JWT token hợp lệ?) then (Không)
@@ -32,31 +32,20 @@ if (JWT token hợp lệ?) then (Không)
 else (Có)
 endif
 
-:Kiểm tra conversationId tồn tại;
+:Thực hiện tạo tin nhắn mới;
+:Ghi vào database SQLite;
 
-if (Conversation tồn tại?) then (Không)
-  :Trả lỗi 404 "Cuộc trò chuyện không tồn tại";
-  :Hiển thị thông báo lỗi;
-  stop
-else (Có)
-endif
-
-:Lưu tin nhắn vào database SQLite;
-
-if (Lưu thành công?) then (Có)
-  :Trả kết quả 201 thành công;
-  :Trả thông tin message mới;
+if (Tạo thành công?) then (Có)
+  :Trả 201 {id, text, conversationId, senderId, createdAt};
+  :Ứng dụng nhận message mới;
+  :Xóa nội dung input;
+  :Cập nhật danh sách tin nhắn;
+  :Hiển thị tin nhắn mới trong chat;
+  :Tự động cuộn xuống cuối danh sách;
 else (Không)
   :Trả lỗi 500 "Lỗi hệ thống";
   :Hiển thị thông báo lỗi;
-  stop
 endif
-
-:Ứng dụng nhận message mới;
-:Xóa nội dung input;
-:Cập nhật danh sách tin nhắn;
-:Hiển thị tin nhắn mới trong chat;
-:Tự động cuộn xuống cuối danh sách;
 
 stop
 
